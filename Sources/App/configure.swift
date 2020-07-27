@@ -5,17 +5,36 @@ import Vapor
 // configures your application
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
-    app.databases.use(.postgres(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database"
-    ), as: .psql)
-
-    app.migrations.add(CreateTodo())
-
-    // register routes
+//    app.databases.use(.postgres(
+//        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
+//        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
+//        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
+//        database: Environment.get("DATABASE_NAME") ?? "vapor_database"
+//    ), as: .psql)
+//
+//    app.migrations.add(CreateTodo())
+//
+//    // register routes
     try routes(app)
+    
+    //app.middleware.use(
+    let gameSystem = GameSystem(eventLoop: app.eventLoopGroup.next())
+    
+    DispatchQueue.global().async {
+        do {
+            startUDP(system: gameSystem)
+        }
+    }
+    
+    app.webSocket("channel") { req, ws in
+        print("WEBSOCKET CHANNEL")
+        gameSystem.connect(ws)
+    }
+    
+    
+    app.get { req in
+        req.view.render("index.html")
+    }
 }
