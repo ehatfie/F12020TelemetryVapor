@@ -24,23 +24,33 @@ public class GameSystem {
     }
     
     func sendData(carData: SimpleCarMotionData) {
+        
         let players = self.clients.active.compactMap({$0 as? PlayerClient})
         print("PLAYERS COUNT \(players.count)")
         guard !players.isEmpty else { return }
         
-        let message = "{\"cool\": \(counter)}"
+        let wrapper = PacketWrapper<SimpleCarMotionData>(type: "SimpleCarMotionData", packetData: carData)
+        let data = try! JSONEncoder().encode(wrapper)
         
-        let data = try! JSONEncoder().encode(carData)
         players.forEach { player in
-            print("SENDING \(message) TO \(player)")
+            player.socket.send([UInt8](data))
+        }
+    }
+    // combine sends to be some generic something
+    func sendData(lapData: LapDataInner) {
+        let players = self.clients.active.compactMap({$0 as? PlayerClient})
+        
+        guard !players.isEmpty else { return }
+        let lapDataSimple = LapDataSimple(from: lapData)
+        let wrapper = PacketWrapper<LapDataSimple>(type:"LapDataSimple", packetData: lapDataSimple)
+        let data = try! JSONEncoder().encode(wrapper)
+        players.forEach { player in
             player.socket.send([UInt8](data))
         }
     }
     
     func connect(_ ws: WebSocket) {
         print("CONNECT")
-        
-        //self.timer = Timer.scheduledTimer(timeInterval: TimeInterval(1), target: self, selector: #selector(doSomething), userInfo: nil, repeats: true)
         
         ws.onBinary { [unowned self] ws, buffer in
             print("ON BINARY")
@@ -52,8 +62,6 @@ public class GameSystem {
         }
         let player = PlayerClient(id: UUID(), socket: ws, status: .init(id: nil))
         self.clients.add(player)
-        //self.notify()
-        //let something = 
     }
     
     func notify() {

@@ -10,6 +10,7 @@ import NIO
 
 class UdpEchoHandler: ChannelInboundHandler {
     let websocketClient: GameSystem
+    
     typealias InboundIn = AddressedEnvelope<ByteBuffer>
     
     init(client: GameSystem) {
@@ -28,30 +29,22 @@ class UdpEchoHandler: ChannelInboundHandler {
                 let carData = motionPacket.carMotionData.first!
                 print("Motion X: \(carData.worldPositionX!) Y: \(carData.worldPositionY!) Z: \(carData.worldPositionZ!)")
                 
-                print("PREWRITE")
                 if let simpleCarData = SimpleCarMotionData(data: carData, index: Int(header.frameIdentifier!)) {
                     websocketClient.sendData(carData: simpleCarData)
                 }
-                
-                gotOne(carData)
-                //context.write(something)
-               // EventLoopFuture.
+            } else if packet.packetType == .LapData {
+                let lapDataPacket = try LapDataPacket(header: header, data: &byteBuffer)
+                if let lapData = lapDataPacket.lapData.first{
+                    websocketClient.sendData(lapData: lapData)
+                }
+            } else if packet.packetType == .SessionData {
+                let sessionDataPacket = try SessionDataPacket(header: header, data: &byteBuffer)
+                print("SESSION DATA \(sessionDataPacket)")
+                print()
             }
         } catch let error {
-            print("ERROR \(error)")
+            print("UDP ERROR \(error)")
         } 
-    }
-}
-
-class OtherEchoHandler: ChannelInboundHandler {
-    typealias InboundIn = AddressedEnvelope<ByteBuffer>
-    
-    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-       // let addressedEnvelope = self.unwrapInboundIn(data)
-        print("OTHER ECHO HANDLER")
-        if let thisValue = data as? CarMotionData {
-            print("GOTTEM")
-        }
     }
 }
 
@@ -89,8 +82,8 @@ public func startUDP(system: GameSystem) {
         print("Channel accepting connections on \(channel.localAddress!))")
         
         try channel.closeFuture.wait()
-    } catch {
-        print("ERROR CATCH")
+    } catch let error {
+        print("ERROR CATCH \(error)")
     }
 
     print("Channel closed")
