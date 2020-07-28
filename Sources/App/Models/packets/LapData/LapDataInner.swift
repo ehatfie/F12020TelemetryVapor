@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import NIO
 
-struct LapDataInner {
+struct LapDataInner: Codable {
     let lastLapTime: Float?
     let currentLapTime: Float?
     
@@ -80,5 +80,14 @@ struct LapDataInner {
     
 }
 
-
-
+struct LapDataSimple: Codable {
+    let bestLapTime: Double?
+    let currentLapTime: Double?
+    
+    init(from data: LapDataInner) {
+        let best = Double(round((Double(data.bestLapTime ?? 0)) * 100)/100)
+        let current = Double(round((Double(data.currentLapTime ?? 0)    ) * 100)/100)
+        self.bestLapTime = best
+        self.currentLapTime = current
+    }
+}
