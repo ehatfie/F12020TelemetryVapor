@@ -5,8 +5,7 @@
 //  Created by Erik Hatfield on 7/24/20.
 //
 
-import Foundation
-import NIO
+import Vapor
 
 class MotionDataPacketHandler: PacketHandler {
     typealias PacketType = MotionDataPacket

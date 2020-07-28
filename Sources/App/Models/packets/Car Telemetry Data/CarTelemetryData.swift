@@ -38,7 +38,7 @@ struct CarTelemetryData {
         
         var temps = [Int?]()
         
-        for i in  0..<4 {
+        for _ in  0..<4 {
             temps.append(data.readInt(as: UInt16.self))
         }
         
