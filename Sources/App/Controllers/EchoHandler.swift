@@ -39,8 +39,8 @@ class UdpEchoHandler: ChannelInboundHandler {
                 }
             } else if packet.packetType == .SessionData {
                 let sessionDataPacket = try SessionDataPacket(header: header, data: &byteBuffer)
-                print("SESSION DATA \(sessionDataPacket)")
-                print()
+                let sessionData = SessionData(from: sessionDataPacket)
+                websocketClient.sendData(sessionData: sessionData)
             }
         } catch let error {
             print("UDP ERROR \(error)")
@@ -50,9 +50,7 @@ class UdpEchoHandler: ChannelInboundHandler {
 
 public func startUDP(system: GameSystem) {
     print("START UDP")
-    
     let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-    let channelSocketOptions = (SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR)
     
     let datagramBootstrap = DatagramBootstrap(group: group)
         .channelOption(ChannelOptions.socketOption(.so_reuseaddr),value: 1)
