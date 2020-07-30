@@ -7,7 +7,8 @@
 
 import Foundation
 
-let trackIDs: [Int: String] = [
+let TrackIDs: [Int: String] = [
+    -1: "Unknown",
     0: "Melbourne",
     1: "Paul Ricard",
     2: "Shanghai",
@@ -38,6 +39,7 @@ let trackIDs: [Int: String] = [
 ]
 
 let TrackIDs2019: [Int: String] = [
+    -1: "Unknown",
     0: "Melbourne",
     1: "Paul Ricard",
     2: "Shanghai",

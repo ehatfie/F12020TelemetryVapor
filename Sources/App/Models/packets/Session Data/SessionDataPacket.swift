@@ -5,9 +5,7 @@
 //  Created by Erik Hatfield on 7/23/20.
 //
 
-import Foundation
-
-import NIO
+import Vapor
 
 struct SessionDataPacket {
     let header: PacketHeader?
@@ -61,7 +59,6 @@ struct SessionDataPacket {
         self.spectatorCarIndex = data.readInt(as: UInt8.self)
         self.sliProNativeSupport = data.readInt(as: UInt8.self)
         
-        
         self.numMarshalZones = data.readInt(as: UInt8.self)
         
         var raceMarshalZones = [MarshalZone]()
@@ -83,7 +80,47 @@ struct SessionDataPacket {
         }
         
         self.weatherForecastSamples = forecastSamples
-        
-        print()
+    }
+}
+
+struct SessionData: Codable {
+    let sessionType: SessionType
+    let weather: WeatherType
+    let trackName: String
+    let totalLaps: Int
+    let sessionTimeLeft: Int
+    let sessionDuration: Int
+    
+    enum CodingKeys: CodingKey {
+        case sessionType, weather, totalLaps, trackName, sessionTimeLeft, sessionDuration
+    }
+    
+    init(from data: SessionDataPacket) {
+        self.sessionType = SessionType(from: data.sessionType)
+        self.weather = WeatherType(from: data.weather)
+        self.totalLaps = data.totalLaps ?? -1
+        self.trackName = TrackIDs[data.trackId ?? -1] ?? "Unrecognized Track"
+        self.sessionTimeLeft = data.sessionTimeLeft ?? -1
+        self.sessionDuration = data.sessionDuration ?? -1
+    }
+    
+    // not using
+    init(from decoder: Decoder) throws {
+        self.sessionType = .unknown
+        self.weather = .unknown
+        self.trackName = "Unknown"
+        self.totalLaps = -1
+        self.sessionTimeLeft = -1
+        self.sessionDuration = -1
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(sessionType.value, forKey: .sessionType)
+        try container.encode(weather.value, forKey: .weather)
+        try container.encode(trackName, forKey: .trackName)
+        try container.encode(totalLaps, forKey: .totalLaps)
+        try container.encode(sessionTimeLeft, forKey: .sessionTimeLeft)
+        try container.encode(sessionDuration, forKey: .sessionDuration)
     }
 }
