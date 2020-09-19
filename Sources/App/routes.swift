@@ -1,18 +1,38 @@
 import Fluent
 import Vapor
 
-func routes(_ app: Application) throws {
-    app.get { req in
-        return req.view.render("index")
-    }
+struct Item: Codable {
+    var title: String
+    var description: String
+}
 
-    app.get("hello") { req -> String in
-        return "Hello, world!"
+struct Page: Codable {
+    var content: String
+}
+
+func routes(_ app: Application) throws {
+    
+    app.get { req -> EventLoopFuture<View> in
+        struct Context: Codable {
+            var items: [Item]
+        }
+        let context = Context(items: [
+            .init(title: "#01", description: "Description #01"),
+            .init(title: "#02", description: "Description #02"),
+            .init(title: "#03", description: "Description #03"),
+            .init(title: "#04", description: "Description #04"),
+        ])
+        
+        return req.view.render("page", context)
     }
     
-    app.get("hello1") { req in
-        return req.view.render("index.html")
-    }
+//     app.get { req in
+//        req.view.render("page", [
+//            "title": "My Page",
+//            "description": "This is my own page.",
+//            "content": "Welcome to my page!"
+//        ])
+//    }
     
     app.webSocket("echo") { req, ws in
         // Connected WebSocket.

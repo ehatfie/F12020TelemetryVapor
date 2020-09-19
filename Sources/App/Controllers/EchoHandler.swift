@@ -9,42 +9,76 @@ import Foundation
 import NIO
 
 class UdpEchoHandler: ChannelInboundHandler {
+    // rename eventually
     let websocketClient: GameSystem
+    let sessionManager: SessionManager
     
     typealias InboundIn = AddressedEnvelope<ByteBuffer>
     
     init(client: GameSystem) {
         self.websocketClient = client
+        self.sessionManager = SessionManager()
     }
     
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let addressedEnvelope = self.unwrapInboundIn(data)
         
         var byteBuffer = addressedEnvelope.data
+        
         do {
             let header = try PacketHeader(data: &byteBuffer)
             let packet = try PacketInfo(format: header.packetFormat, version: header.packetVersion, type: header.packetId)
-            if packet.packetType == .Motion {
-                let motionPacket = try MotionDataPacket(header: header, data: &byteBuffer)
-                let carData = motionPacket.carMotionData.first!
-                print("Motion X: \(carData.worldPositionX!) Y: \(carData.worldPositionY!) Z: \(carData.worldPositionZ!)")
+            //print("packet type: \(packet.packetType.rawValue)")
+            //DispatchQueue.main.async {
                 
-                if let simpleCarData = SimpleCarMotionData(data: carData, index: Int(header.frameIdentifier!)) {
-                    websocketClient.sendData(carData: simpleCarData)
-                }
+            if packet.packetType == .Motion {
+                self.handleMotionData(header: header, data: &byteBuffer)
             } else if packet.packetType == .LapData {
-                let lapDataPacket = try LapDataPacket(header: header, data: &byteBuffer)
-                if let lapData = lapDataPacket.lapData.first{
-                    websocketClient.sendData(lapData: lapData)
-                }
+                self.handleLapData(header: header, data: &byteBuffer)
             } else if packet.packetType == .SessionData {
-                let sessionDataPacket = try SessionDataPacket(header: header, data: &byteBuffer)
-                let sessionData = SessionData(from: sessionDataPacket)
-                websocketClient.sendData(sessionData: sessionData)
+                self.handleSessionData(header: header, data: &byteBuffer)
+            } else if packet.packetType == .EventData {
+                self.handleEventData(header: header, data: &byteBuffer)
             }
+
         } catch let error {
             print("UDP ERROR \(error)")
         } 
+    }
+    
+    func handleMotionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        guard let motionPacket = try? MotionDataPacket(header: header, data: &byteBuffer) else { return }
+        let carData = motionPacket.carMotionData.first!
+        
+//        if let simpleCarData = SimpleCarMotionData(data: carData, index: Int(header.frameIdentifier!)) {
+//            //websocketClient.sendData(carData: simpleCarData)
+//        }
+    }
+    
+    func handleLapData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        guard let lapDataPacket = try? LapDataPacket(header: header, data: &byteBuffer) else { return }
+        self.sessionManager.newLapDataPacket(lapData: lapDataPacket)
+    }
+    
+    func handleSessionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        guard let sessionDataPacket = try? SessionDataPacket(header: header, data: &byteBuffer) else { return }
+        let sessionData = SessionData(from: sessionDataPacket)
+        self.sessionManager.newSessionData(data: sessionData)
+    }
+    
+    func handleEventData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        guard let eventDataPacket = try? EventDataPacket(header: header, data: &byteBuffer) else { return }
+        let event = eventDataPacket.eventStringCode.value
+        print("event: \(event)")
+        if eventDataPacket.eventStringCode == .SessionStart {
+            // do something?
+        } else if eventDataPacket.eventStringCode == .SessionEnd{
+            self.sessionManager.endSession()
+        }
+//        if eventDataPacket.eventStringCode == .SessionStart {
+//            self.websocketClient.newSession()
+//        }
+//        websocketClient.sendData(sessionData: sessionData)
     }
 }
 

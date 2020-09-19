@@ -7,15 +7,26 @@
 
 import Vapor
 
+// rename
 public class GameSystem {
+    var activeSession: Session? = nil
     var clients: WebsocketClients
     var timer: Timer? = nil
     var counter: Int = 0
     
     init(eventLoop: EventLoop) {
         self.clients = WebsocketClients(eventLoop: eventLoop)
-        
     }
+    
+    func sessionEnd() {
+        //self.activeSession.save()
+        self.activeSession = nil
+    }
+    
+    func newSession(with data: SessionData) {
+        self.activeSession = Session(from: data)
+    }
+    
     
     @objc func doSomething() {
         print("do something")
@@ -51,6 +62,9 @@ public class GameSystem {
     }
     
     func sendData(sessionData: SessionData) {
+        if self.activeSession == nil {
+            self.newSession(with: sessionData)
+        }
         let players = self.clients.active.compactMap({$0 as? PlayerClient})
         guard !players.isEmpty else { return }
         

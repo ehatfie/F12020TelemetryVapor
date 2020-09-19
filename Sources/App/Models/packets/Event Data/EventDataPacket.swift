@@ -9,20 +9,51 @@ import Foundation
 import NIO
 
 enum EventStringCode: String {
-    case SSTA = "SSTA" // session started
-    case SEND = "SEND" // session ended
-    case FTLP = "FTLP" // fastest lap
-    case RTMT = "RTMT" // retirement
-    case DRSE = "DRSE" // drs enabled
-    case DRSD = "DRSD" // drs disabled
-    case TMPT = "TMPT" // team mate in pits
-    case CHQF = "CHQF" // chequered flag
-    case RCWN = "RCWN" // race winner
+    case SessionStart = "SSTA"  // session started
+    case SessionEnd = "SEND"  // session ended
+    case FTLP = "FTLP"  // fastest lap
+    case RTMT = "RTMT"  // retirement
+    case DRSE = "DRSE"  // drs enabled
+    case DRSD = "DRSD"  // drs disabled
+    case TMPT = "TMPT"  // team mate in pits
+    case CHQF = "CHQF"  // chequered flag
+    case RCWN = "RCWN"  // race winner
+    case PENA = "PENA"  // penalty issued, details in event
+    case SPTP = "SPTP"  // Speed Trap Triggered
     case ERRO = "ERROR" // error
     
     init(value: String?) {
         guard let value = value else { self = .ERRO; return }
         self = EventStringCode(rawValue: value) ?? EventStringCode.ERRO
+    }
+    
+    var value: String {
+        switch self {
+        case .SessionStart:
+            return "Session Started"
+        case .SessionEnd:
+            return "Session Ended"
+        case .FTLP:
+            return "Fastest Lap"
+        case .RTMT:
+            return "Retirement"
+        case .DRSE:
+            return "DRS Enabled"
+        case .DRSD:
+            return "DRS Disabled"
+        case .TMPT:
+            return "Teammate in pits"
+        case .CHQF:
+            return "Chequered flag"
+        case .RCWN:
+            return "Race Winner"
+        case .PENA:
+            return "Penalty Issued"
+        case .SPTP:
+            return "Speed trap Triggered"
+        case .ERRO:
+            return "ERROR"
+        }
     }
 }
 

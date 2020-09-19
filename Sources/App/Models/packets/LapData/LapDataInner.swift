@@ -18,9 +18,9 @@ struct LapDataInner: Codable {
     
     let bestLapTime: Float?          // best lap time of the session
     let bestLapNum: UInt8?           // Lap number the best lap time was set on
-    let bestLapSector1Time: UInt16? // sector 1 time of the best lap in the session in milliseconds
-    let bestLapSector2Time: UInt16? // sector 2 time of the best lap in the session in milliseconds
-    let bestLapSector3Time: UInt16? // sector 3 time of the best lap in the session in milliseconds
+    let bestLapSector1Time: UInt16?  // sector 1 time of the best lap in the session in milliseconds
+    let bestLapSector2Time: UInt16?  // sector 2 time of the best lap in the session in milliseconds
+    let bestLapSector3Time: UInt16?  // sector 3 time of the best lap in the session in milliseconds
     
     let bestOverallSector1Time: UInt16? // Best overall sector 1 time of the session
     let bestOverallSector1LapNum: UInt8? // Lap number of best overall sector 1 time
@@ -83,11 +83,15 @@ struct LapDataInner: Codable {
 struct LapDataSimple: Codable {
     let bestLapTime: Double?
     let currentLapTime: Double?
+    let lastLapTime: Double?
     
     init(from data: LapDataInner) {
         let best = Double(round((Double(data.bestLapTime ?? 0)) * 100)/100)
-        let current = Double(round((Double(data.currentLapTime ?? 0)    ) * 100)/100)
+        let current = Double(round((Double(data.currentLapTime ?? 0)) * 100)/100)
+        let last = Double(round((Double(data.lastLapTime ?? 0)) * 100)/100)
+        
         self.bestLapTime = best
         self.currentLapTime = current
+        self.lastLapTime = last
     }
 }
