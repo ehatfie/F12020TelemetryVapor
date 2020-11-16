@@ -6,9 +6,11 @@
 //
 
 import Vapor
+import F12020TelemetryPackets
 
 // rename
 public class GameSystem {
+    typealias SessionData = F12020TelemetryPackets.SessionData
     var activeSession: Session? = nil
     var clients: WebsocketClients
     var timer: Timer? = nil

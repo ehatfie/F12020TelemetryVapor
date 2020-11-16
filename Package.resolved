@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "F12020TelemetryPackets",
+        "repositoryURL": "https://github.com/ehatfie/F12020TelemetryPackets.git",
+        "state": {
+          "branch": null,
+          "revision": "cb1e381e7575284430d5fd4fd0da97828fa247e6",
+          "version": "0.0.12"
+        }
+      },
+      {
         "package": "fluent",
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
@@ -53,6 +62,24 @@
           "branch": null,
           "revision": "f310f8843fafa3134cf89d81b8b3480f16967f37",
           "version": "2.1.0"
+        }
+      },
+      {
+        "package": "leaf",
+        "repositoryURL": "https://github.com/vapor/leaf.git",
+        "state": {
+          "branch": null,
+          "revision": "6fc9ec82f5098ab93933e19ceb4ef030f52d646c",
+          "version": "4.0.0-rc.1.4"
+        }
+      },
+      {
+        "package": "leaf-kit",
+        "repositoryURL": "https://github.com/vapor/leaf-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "a3623bd217d1c0327839afbc0bdc2351f7d06c1a",
+          "version": "1.0.0-rc.1.17"
         }
       },
       {

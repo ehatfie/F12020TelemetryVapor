@@ -13,7 +13,8 @@ extension FieldKey {
 final class Todo: Model, Content {
     static let schema = "todos"
     
-    enum Status: String, Codable {
+    enum Status: String, Codable, CaseIterable {
+        static var name: FieldKey { .status }
         case pending
         case completed
     }
@@ -73,7 +74,7 @@ struct CreateToDo: Migration {
             .create()
     }
     
-    func revert(on database: Database) -> EventLoopFuture<void> {
+    func revert(on database: Database) -> EventLoopFuture<Void> {
         return database.schema(Todo.schema).delete()
     }
 }

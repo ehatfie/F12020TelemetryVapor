@@ -6,9 +6,12 @@
 //
 
 import Vapor
+import F12020TelemetryPackets
 
 class Session {
-    let sessionType: SessionType
+    typealias SessionData = F12020TelemetryPackets.SessionData
+    typealias SessionType = F12020TelemetryPackets.SessionType
+    let sessionType: SessionType?
     var lastSessionData: SessionData?
     var lapData: LapDataSimple?
     var lapDataInner: [LapDataInner] = [] // all lap data values for player car
@@ -64,20 +67,21 @@ class LapDataSummary {
     
     // how to prevent force unwraps?
     init(from lapData: LapDataInner) {
-        self.lapCount = Int(lapData.currentLapNum!)
         
-        self.bestLapTime = lapData.bestLapTime!
-        self.bestLapNum = Int(lapData.bestLapNum!)
-        self.bestLapSector1Time = Int(lapData.bestLapSector1Time!)
-        self.bestLapSector2Time = Int(lapData.bestLapSector2Time!)
-        self.bestLapSector3Time = Int(lapData.bestLapSector3Time!)
+        self.lapCount = Int(lapData.currentLapNum)
         
-        self.bestOverallSector1Time = Int(lapData.bestOverallSector1Time!)
-        self.bestOverallSector2Time = Int(lapData.bestOverallSector2Time!)
-        self.bestOverallSector3Time = Int(lapData.bestOverallSector3Time!)
+        self.bestLapTime = lapData.bestLapTime
+        self.bestLapNum = Int(lapData.bestLapNum)
+        self.bestLapSector1Time = Int(lapData.bestLapSector1Time)
+        self.bestLapSector2Time = Int(lapData.bestLapSector2Time)
+        self.bestLapSector3Time = Int(lapData.bestLapSector3Time)
         
-        self.bestOverallSector1LapNum = Int(lapData.bestOverallSector1LapNum!)
-        self.bestOverallSector2LapNum = Int(lapData.bestOverallSector2LapNum!)
-        self.bestOverallSector3LapNum = Int(lapData.bestOverallSector3LapNum!)
+        self.bestOverallSector1Time = Int(lapData.bestOverallSector1Time)
+        self.bestOverallSector2Time = Int(lapData.bestOverallSector2Time)
+        self.bestOverallSector3Time = Int(lapData.bestOverallSector3Time)
+        
+        self.bestOverallSector1LapNum = Int(lapData.bestOverallSector1LapNum)
+        self.bestOverallSector2LapNum = Int(lapData.bestOverallSector2LapNum)
+        self.bestOverallSector3LapNum = Int(lapData.bestOverallSector3LapNum)
     }
 }

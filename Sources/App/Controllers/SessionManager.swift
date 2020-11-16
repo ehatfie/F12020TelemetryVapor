@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import F12020TelemetryPackets
 
 class SessionManager {
     var activeSession: Session?

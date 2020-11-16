@@ -7,6 +7,7 @@
 
 import Foundation
 import NIO
+import F12020TelemetryPackets
 
 class UdpEchoHandler: ChannelInboundHandler {
     // rename eventually
@@ -25,25 +26,17 @@ class UdpEchoHandler: ChannelInboundHandler {
         
         var byteBuffer = addressedEnvelope.data
         
-        do {
-            let header = try PacketHeader(data: &byteBuffer)
-            let packet = try PacketInfo(format: header.packetFormat, version: header.packetVersion, type: header.packetId)
-            //print("packet type: \(packet.packetType.rawValue)")
-            //DispatchQueue.main.async {
-                
-            if packet.packetType == .Motion {
-                self.handleMotionData(header: header, data: &byteBuffer)
-            } else if packet.packetType == .LapData {
-                self.handleLapData(header: header, data: &byteBuffer)
-            } else if packet.packetType == .SessionData {
-                self.handleSessionData(header: header, data: &byteBuffer)
-            } else if packet.packetType == .EventData {
-                self.handleEventData(header: header, data: &byteBuffer)
-            }
-
-        } catch let error {
-            print("UDP ERROR \(error)")
-        } 
+        guard let header = PacketHeader(data: &byteBuffer) else { return }
+        let packet = PacketInfo(format: header.packetFormat, version: header.packetVersion, type: header.packetId)
+        if packet.packetType == .Motion {
+            self.handleMotionData(header: header, data: &byteBuffer)
+        } else if packet.packetType == .LapData {
+            self.handleLapData(header: header, data: &byteBuffer)
+        } else if packet.packetType == .SessionData {
+            self.handleSessionData(header: header, data: &byteBuffer)
+        } else if packet.packetType == .EventData {
+            self.handleEventData(header: header, data: &byteBuffer)
+        }
     }
     
     func handleMotionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
