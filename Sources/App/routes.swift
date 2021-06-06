@@ -39,5 +39,5 @@ func routes(_ app: Application) throws {
         print(ws)
     }
 
-    try app.register(collection: TodoController())
+    try app.register(collection: LapController())
 }
