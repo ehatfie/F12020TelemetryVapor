@@ -28,6 +28,7 @@ class UdpEchoHandler: ChannelInboundHandler {
         
         guard let header = PacketHeader(data: &byteBuffer) else { return }
         let packet = PacketInfo(format: header.packetFormat, version: header.packetVersion, type: header.packetId)
+
         if packet.packetType == .Motion {
             self.handleMotionData(header: header, data: &byteBuffer)
         } else if packet.packetType == .LapData {
@@ -40,7 +41,7 @@ class UdpEchoHandler: ChannelInboundHandler {
     }
     
     func handleMotionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
-        guard let motionPacket = try? MotionDataPacket(header: header, data: &byteBuffer) else { return }
+        guard let motionPacket = MotionDataPacket(header: header, data: &byteBuffer) else { return }
         let carData = motionPacket.carMotionData.first!
         
 //        if let simpleCarData = SimpleCarMotionData(data: carData, index: Int(header.frameIdentifier!)) {
@@ -49,23 +50,25 @@ class UdpEchoHandler: ChannelInboundHandler {
     }
     
     func handleLapData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
-        guard let lapDataPacket = try? LapDataPacket(header: header, data: &byteBuffer) else { return }
+        guard let lapDataPacket = LapDataPacket(header: header, data: &byteBuffer) else { return }
         self.sessionManager.newLapDataPacket(lapData: lapDataPacket)
     }
     
     func handleSessionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
-        guard let sessionDataPacket = try? SessionDataPacket(header: header, data: &byteBuffer) else { return }
+        guard let sessionDataPacket = SessionDataPacket(header: header, data: &byteBuffer) else {
+            return }
+        
         let sessionData = SessionData(from: sessionDataPacket)
         self.sessionManager.newSessionData(data: sessionData)
     }
     
     func handleEventData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
-        guard let eventDataPacket = try? EventDataPacket(header: header, data: &byteBuffer) else { return }
+        guard let eventDataPacket = EventDataPacket(header: header, data: &byteBuffer) else { return }
         let event = eventDataPacket.eventStringCode.value
         print("event: \(event)")
         if eventDataPacket.eventStringCode == .SessionStart {
             // do something?
-        } else if eventDataPacket.eventStringCode == .SessionEnd{
+        } else if eventDataPacket.eventStringCode == .SessionEnd {
             self.sessionManager.endSession()
         }
 //        if eventDataPacket.eventStringCode == .SessionStart {
@@ -99,7 +102,7 @@ public func startUDP(system: GameSystem) {
         .first ?? defaultPort // get port or use default if no valid port was provided
     
     // TODO: get this address from commandline
-    let bindToAddress = "192.168.1.119"
+    let bindToAddress = "192.168.1.206"
     
     do {
         let channel = try datagramBootstrap.bind(host: bindToAddress, port: port).wait()

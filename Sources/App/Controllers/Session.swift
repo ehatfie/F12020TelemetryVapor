@@ -28,6 +28,7 @@ class Session {
     }
     
     func accept(lapData: LapDataInner) {
+        print("accept LapData \(lapData)")
         self.lapDataInner.append(lapData)
          
         self.lapData = LapDataSimple(from: lapData)
@@ -68,20 +69,20 @@ class LapDataSummary {
     // how to prevent force unwraps?
     init(from lapData: LapDataInner) {
         
-        self.lapCount = Int(lapData.currentLapNum)
+        self.lapCount = lapData.currentLapNum
         
         self.bestLapTime = lapData.bestLapTime
-        self.bestLapNum = Int(lapData.bestLapNum)
-        self.bestLapSector1Time = Int(lapData.bestLapSector1Time)
-        self.bestLapSector2Time = Int(lapData.bestLapSector2Time)
-        self.bestLapSector3Time = Int(lapData.bestLapSector3Time)
+        self.bestLapNum = lapData.bestLapNum
+        self.bestLapSector1Time = lapData.bestLapSector1Time
+        self.bestLapSector2Time = lapData.bestLapSector2Time
+        self.bestLapSector3Time = lapData.bestLapSector3Time
         
-        self.bestOverallSector1Time = Int(lapData.bestOverallSector1Time)
-        self.bestOverallSector2Time = Int(lapData.bestOverallSector2Time)
-        self.bestOverallSector3Time = Int(lapData.bestOverallSector3Time)
+        self.bestOverallSector1Time = lapData.bestOverallSector1Time
+        self.bestOverallSector2Time = lapData.bestOverallSector2Time
+        self.bestOverallSector3Time = lapData.bestOverallSector3Time
         
-        self.bestOverallSector1LapNum = Int(lapData.bestOverallSector1LapNum)
-        self.bestOverallSector2LapNum = Int(lapData.bestOverallSector2LapNum)
-        self.bestOverallSector3LapNum = Int(lapData.bestOverallSector3LapNum)
+        self.bestOverallSector1LapNum = lapData.bestOverallSector1LapNum
+        self.bestOverallSector2LapNum = lapData.bestOverallSector2LapNum
+        self.bestOverallSector3LapNum = lapData.bestOverallSector3LapNum
     }
 }
