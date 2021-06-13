@@ -36,7 +36,6 @@ class SessionManager {
     }
     
     func newLapDataPacket(lapData: LapDataPacket) {
-        print("new lap data packet")
         guard let playerLapData = lapData.lapData.first else { return }
         self.activeSession?.accept(lapData: playerLapData)
     }

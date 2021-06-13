@@ -8,12 +8,45 @@
 import Vapor
 import F12020TelemetryPackets
 
+enum DriverStatus: Int {
+    case garage = 0
+    case flyingLap = 1
+    case inLap = 2
+    case outLap = 3
+    case onTrack = 4
+    case unknown = -1
+    
+    init(from value: Int) {
+        guard let status = DriverStatus(rawValue: value) else { self = .unknown; return }
+        self = status
+    }
+    
+    var value: String {
+        switch self {
+        case .garage:
+            return "Garage"
+        case .flyingLap:
+            return "Flying Lap"
+        case .inLap:
+            return "In Lap"
+        case .outLap:
+            return "Out Lap"
+        case .onTrack:
+            return "On Track"
+        default:
+            return "Unknown"
+        }
+    }
+}
+
 class Session {
     typealias SessionData = F12020TelemetryPackets.SessionData
     typealias SessionType = F12020TelemetryPackets.SessionType
     let sessionType: SessionType?
     var lastSessionData: SessionData?
     var lapData: LapDataSimple?
+    var lastLapData: LapDataInner?
+    var lastLap: LapDataInner?
     var lapDataInner: [LapDataInner] = [] // all lap data values for player car
     
     
@@ -21,18 +54,39 @@ class Session {
         self.lastSessionData = nil
         self.sessionType = sessionData.sessionType
         print("Session Init")
+        
+       // let foo = TestClass123
     }
     
     func accept(lapData: LapDataSimple) {
         self.lapData = lapData
-    }
+    }	
     
     func accept(lapData: LapDataInner) {
-        print("accept LapData \(lapData)")
+        let driverStatus = DriverStatus(from: lapData.driverStatus)
+        let lapNum = lapData.currentLapNum
+        let lapTime = lapData.currentLapTime
+        let currentLapInvalid = lapData.currentLapInvalid == 1
+        
+        
+        //print("lap: \(lapNum) time: \(lapTime) status: \(driverStatus.value) isInvalid: \(currentLapInvalid)")
+        //print("distance: \(lapData.lapDistance) totalDistance: \(lapData.totalDistance)")
         self.lapDataInner.append(lapData)
          
         self.lapData = LapDataSimple(from: lapData)
-        //print("new lap data count: \(self.lapDataInner.count)")
+        // if this packet has a new lap number the previous lapDataInner was the final one for the previous lap
+        if let lastLapData = lastLapData, lapNum != lastLapData.currentLapNum {
+            let lastTime = lapData.lastLapTime
+            let sector1 = lastLapData.sector1Time
+            let sector2 = lastLapData.sector2Time
+            
+            let sector3 = (Int(lastTime * 1000)) - (sector1 + sector2)
+            	
+            print("lap: \(lapNum) time: \(lastTime) S1: \(sector1) S2: \(sector2) S3: \(sector3)")
+            self.lastLap = lastLapData
+        }
+        
+        self.lastLapData = lapData
     }
     
     func accept(sessionData: SessionData) {
