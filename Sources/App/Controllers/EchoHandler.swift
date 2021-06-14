@@ -28,18 +28,27 @@ class UdpEchoHandler: ChannelInboundHandler {
         
         guard let header = PacketHeader(data: &byteBuffer) else { return }
         let packet = PacketInfo(format: header.packetFormat, version: header.packetVersion, type: header.packetId)
-
-        if packet.packetType == .Motion {
-            self.handleMotionData(header: header, data: &byteBuffer)
-        } else if packet.packetType == .LapData {
-            self.handleLapData(header: header, data: &byteBuffer)
-        } else if packet.packetType == .SessionData {
-            self.handleSessionData(header: header, data: &byteBuffer)
-        } else if packet.packetType == .EventData {
-            self.handleEventData(header: header, data: &byteBuffer)
+        switch packet.packetType {
+        case .Motion:
+            handleMotionData(header: header, data: &byteBuffer)
+        case .LapData:
+            handleLapData(header: header, data: &byteBuffer)
+        case .SessionData:
+            handleSessionData(header: header, data: &byteBuffer)
+        case .EventData:
+            handleEventData(header: header, data: &byteBuffer)
+        case .CarSetups:
+            handleCarSetupData(header: header, data: &byteBuffer)
+        case .CarStatus:
+            handleCarStatus(header: header, data: &byteBuffer)
+        default:
+            return
+            print("shortDescript: \(packet.packetType.shortDescription)")
         }
+        
+        
     }
-    
+    	
     func handleMotionData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
         guard let motionPacket = MotionDataPacket(header: header, data: &byteBuffer) else { return }
         let carData = motionPacket.carMotionData.first!
@@ -75,6 +84,19 @@ class UdpEchoHandler: ChannelInboundHandler {
 //            self.websocketClient.newSession()
 //        }
 //        websocketClient.sendData(sessionData: sessionData)
+    }
+    
+    func handleCarSetupData(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        guard let carSetupPacket = CarSetupPacket(header: header, data: &byteBuffer) else { return }
+        
+        sessionManager.newCarSetupPacket(setupData: carSetupPacket)
+    }
+    
+    func handleCarStatus(header: PacketHeader, data byteBuffer: inout ByteBuffer) {
+        
+        guard let carStatusPacket = CarStatusPacket(header: header, data: &byteBuffer) else {
+            return
+        }
     }
 }
 

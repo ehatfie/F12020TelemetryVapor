@@ -49,6 +49,8 @@ class Session {
     var lastLap: LapDataInner?
     var lapDataInner: [LapDataInner] = [] // all lap data values for player car
     
+    var activeSetup: CarSetupData?
+    
     
     init(from sessionData: SessionData) {
         self.lastSessionData = nil
@@ -91,6 +93,21 @@ class Session {
     
     func accept(sessionData: SessionData) {
         self.lastSessionData = sessionData
+    }
+    
+    func accept(_ carSetupData: CarSetupData) {
+        guard let activeSetup = self.activeSetup else {
+            print("first car setup")
+            self.activeSetup = carSetupData
+            return
+        }
+        
+        if activeSetup != carSetupData {
+            print("new car setup")
+            self.activeSetup = carSetupData
+        } else {
+            print("same car setup")
+        }
     }
     
     func createSessionSummary() {

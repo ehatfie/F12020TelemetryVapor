@@ -39,4 +39,12 @@ class SessionManager {
         guard let playerLapData = lapData.lapData.first else { return }
         self.activeSession?.accept(lapData: playerLapData)
     }
+    
+    func newCarSetupPacket(setupData: CarSetupPacket) {
+        guard let playerCarSetupData = setupData.carSetups.first else {
+            print("cant cast")
+            return }
+        
+        activeSession?.accept(playerCarSetupData)
+    }
 }
